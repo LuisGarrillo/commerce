@@ -8,7 +8,8 @@ from django.urls import reverse
 from .models import User, Auction
 from .utils import options
 from .verifications import verify_listing
-
+from .models_handler import save_auction
+from .forms import AuctionForm
 
 def index(request):
     return render(request, "auctions/index.html")
@@ -69,14 +70,22 @@ def register(request):
 def create_listing(request):
     if request.method == "POST":
         title = request.POST["title"]
+        description = request.POST["description"]
+        cover = request.FILES["cover"]
         initial_bid = int(request.POST["initial_bid"])
         category = request.POST["category"]
-        cover = request.POST["cover"]
-        body = request.POST["body"]
         
-        response = verify_listing(title, initial_bid, category, cover, body)
-        response["message"]
-        # request.user.id get id of loged user!!!!!
+        """form = AuctionForm(request.POST, request.FILES)
+        if form.is_valid():
+            print("hola")
+            form.save()"""
+        
+
+        response = verify_listing(title, description, initial_bid, category, cover)
+        
+        save_auction(title, description, initial_bid, category, cover, User(request.user.id))
+
+        return HttpResponseRedirect(reverse("index"))
         
 
     return render(request, "auctions/create-listing.html", {
