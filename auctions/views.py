@@ -75,6 +75,11 @@ def create_listing(request):
         category = request.POST["category"]
 
         response = verify_listing(title, description, initial_bid, category, cover)
+        if not response["success"]:
+            return render(request, "auctions/create-listing.html", {
+                "options": options,
+                "message": response["message"]
+            })
         
         save_auction(title, description, initial_bid, category, cover, User(request.user.id))
 
