@@ -9,7 +9,6 @@ from .models import User, Auction
 from .utils import options
 from .verifications import verify_listing
 from .models_handler import save_auction
-from .forms import AuctionForm
 
 def index(request):
     return render(request, "auctions/index.html")
@@ -74,12 +73,6 @@ def create_listing(request):
         cover = request.FILES["cover"]
         initial_bid = int(request.POST["initial_bid"])
         category = request.POST["category"]
-        
-        """form = AuctionForm(request.POST, request.FILES)
-        if form.is_valid():
-            print("hola")
-            form.save()"""
-        
 
         response = verify_listing(title, description, initial_bid, category, cover)
         
