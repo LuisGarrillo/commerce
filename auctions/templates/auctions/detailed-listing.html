@@ -1,0 +1,47 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <div>
+        <img src="{{ listing.cover.url }}">
+    </div>
+    <div>
+        <div>
+            <h1>{{ listing.title }}</h1>
+            <h3>{{ listing.category }}</h3>
+            <p>{{ listing.description }}</p>
+        </div>
+        
+        <div>
+            {% if user.is_authenticated and not is_author %}
+                {% if not on_watchlist %}
+                    <a href="{% url 'add to watchlist' listing.id %}">
+                        Add this listing to your Watchlist!
+                    </a>
+                {% else %}
+                    <a href="{% url 'remove from watchlist' listing.id %}">
+                        Remove this listing from your Watchlist.
+                    </a>
+                {% endif %}
+            {% endif %}
+            <h2>Higher bid: {{ higher_bid.amount }}</h2>
+            <h3>Initial bid: {{ listing.initial_bid }}</h3>
+
+            {% if user.is_authenticated %}
+                {% if not listing.winner %}
+                    {% if not is_author %}
+                        <form action="{% url 'bid listing' listing.id %}">
+                            <input name="bid-amount" type="number">
+                            <button name="bid-button" type="submit">Bid</button>
+                        </form>
+                    {% else %}
+                        <a href="{% url 'close auction' listing.id %}">
+                            Close this Auction
+                        </a>
+                    {% endif %}
+                {% else %}
+                    <h3>This Auction is closed.</h3>
+                {% endif %}   
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

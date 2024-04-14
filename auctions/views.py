@@ -5,7 +5,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
-from .models import User, Auction
+from .models import User, Auction, Bid
 from .utils import options
 from .verifications import verify_listing
 from .models_handler import save_auction
@@ -70,7 +70,13 @@ def register(request):
         return render(request, "auctions/register.html")
 
 def detailed_listing(request, listing_id):
-    return HttpResponseRedirect(reverse("index"))
+    listing = Auction.objects.get(pk=listing_id)
+    higher_bid = Bid.objects.order_by("amount").filter(auction_id=listing_id)[0]
+    return render(request, "auctions/detailed-listing.html", {
+        "listing": listing,
+        "is_author": listing.author.id == request.user.id,
+        "higher_bid": higher_bid,
+    })
 
 @login_required
 def create_listing(request):
@@ -96,3 +102,19 @@ def create_listing(request):
     return render(request, "auctions/create-listing.html", {
         "options": options
     })
+
+@login_required
+def bid(request, listing_id):
+    ...
+
+@login_required
+def add_watchlist(request, listing_id):
+    ...
+
+@login_required
+def remove_watchlist(request, listing_id):
+    ...
+
+@login_required
+def close_auction(request, listing_id):
+    ...

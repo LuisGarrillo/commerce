@@ -5,7 +5,16 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
-from .models import User, Auction
+from .models import User, Auction, Bid
+
+def create_bid(auction, author, amount):
+    bid = Bid(
+        amount=amount,
+        author=author,
+        auction=auction
+    )
+
+    bid.save()
 
 def save_auction(title, description, initial_bid, category, cover, author):
     
@@ -21,3 +30,5 @@ def save_auction(title, description, initial_bid, category, cover, author):
         )
     
     auction.save()
+    create_bid(auction, author, initial_bid)
+    

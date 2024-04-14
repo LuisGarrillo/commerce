@@ -20,6 +20,7 @@ class Auction(models.Model):
     timestamp = models.DateTimeField(default=timezone.now)
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="listings")
     winner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="won_auctions", null=True, blank=True)
+    watchlist = models.ManyToManyField(User, related_name="watched_listings", null=True, blank=True)
 
     @property
     def cover_filename(self):
