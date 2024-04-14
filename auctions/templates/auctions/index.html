@@ -2,6 +2,24 @@
 
 {% block body %}
     <h2>Active Listings</h2>
-
-    TODO
+    <div class="listing-list">
+        {% for listing in listings %}
+            <a href="{% url 'see listing' listing.id %}" class="listing-container">
+                <div class="listing-elements-container">
+                    <div>
+                        <img src="{{listing.cover.url}}" class="listing-cover-mini" width="400" height="250">
+                    </div>
+                    <div class="listing-title-container-mini">
+                        <h3>{{ listing.title }}</h3>
+                    </div>
+                    <div>
+                        <h3>Initial Bid:</h3>
+                        <h4>$ {{ listing.initial_bid }}</h4>
+                    </div>
+                </div>
+            </a>
+        {% empty %}
+            <h3>No active listings in the moment</h3>
+        {% endfor %}
+    </div>
 {% endblock %}

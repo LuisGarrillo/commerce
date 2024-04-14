@@ -11,7 +11,11 @@ from .verifications import verify_listing
 from .models_handler import save_auction
 
 def index(request):
-    return render(request, "auctions/index.html")
+    listings = Auction.objects.exclude(author=request.user.id)
+
+    return render(request, "auctions/index.html", {
+        "listings": listings
+    })
 
 
 def login_view(request):
@@ -64,6 +68,9 @@ def register(request):
         return HttpResponseRedirect(reverse("index"))
     else:
         return render(request, "auctions/register.html")
+
+def detailed_listing(request, listing_id):
+    return HttpResponseRedirect(reverse("index"))
 
 @login_required
 def create_listing(request):
