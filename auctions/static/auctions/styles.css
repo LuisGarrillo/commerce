@@ -1,3 +1,48 @@
 body {
     padding: 10px;
 }
+
+.listing-list {
+    padding: 10px;
+    background-color: rgb(181, 232, 215);
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.listing-container {
+    height: 450px;
+    width : 430px;
+    margin: 0px 10px 10px 10px; 
+    padding:10px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+
+    background-color: rgb(222, 240, 255);
+    color: rgb(50, 50, 50);
+    border-radius: 20px;
+}
+
+.listing-container:hover {
+    text-decoration: none;
+    transition: 0.2s;
+    background-color: rgb(207, 230, 251);
+    color: rgb(30, 30, 30);
+}
+
+.listing-elements-container {
+    height: 420px;
+    display: grid;
+    grid-template-rows: 60% 20% 20%;
+}
+.listing-title-container-mini {
+    padding: 10px 0px;
+}
+
+.listing-cover-mini {
+    border-radius: 10px;
+}

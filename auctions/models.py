@@ -2,6 +2,7 @@ from django.contrib.auth.models import AbstractUser
 from django.core.files.storage import FileSystemStorage
 from django.db import models
 from django.utils import timezone
+import os
 
 class User(AbstractUser):
     email_address = models.CharField(max_length=500)
@@ -19,6 +20,10 @@ class Auction(models.Model):
     timestamp = models.DateTimeField(default=timezone.now)
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="listings")
     winner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="won_auctions", null=True, blank=True)
+
+    @property
+    def cover_filename(self):
+        return os.path.basename(self.cover.filename)
 
 
 class Bid(models.Model):
