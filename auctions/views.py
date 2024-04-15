@@ -8,10 +8,10 @@ from django.urls import reverse
 from .models import User, Auction, Bid
 from .utils import options
 from .verifications import verify_listing
-from .models_handler import save_auction
+from .models_handler import save_auction, create_bid
 
 def index(request):
-    listings = Auction.objects.exclude(author=request.user.id)
+    listings = Auction.objects.exclude(author=request.user.id).filter(status=0)
 
     return render(request, "auctions/index.html", {
         "listings": listings
@@ -71,7 +71,7 @@ def register(request):
 
 def detailed_listing(request, listing_id):
     listing = Auction.objects.get(pk=listing_id)
-    higher_bid = Bid.objects.order_by("amount").filter(auction_id=listing_id)[0]
+    higher_bid = Bid.objects.filter(auction_id=listing_id).order_by("-amount")[0]
     return render(request, "auctions/detailed-listing.html", {
         "listing": listing,
         "is_author": listing.author.id == request.user.id,
@@ -106,7 +106,16 @@ def create_listing(request):
 
 @login_required
 def bid(request, listing_id):
-    ...
+    if request.method == "POST":
+        bid_amount = float(request.POST["bid-amount"])
+        higher_bid = Bid.objects.filter(auction_id=listing_id).order_by("-amount")[0]
+
+        #verification
+
+        create_bid(Auction.objects.get(pk=listing_id), User.objects.get(pk=request.user.id), bid_amount)
+        return HttpResponseRedirect(reverse("see listing", args=[listing_id]))
+
+
 
 @login_required
 def add_watchlist(request, listing_id):
@@ -124,4 +133,12 @@ def remove_watchlist(request, listing_id):
 
 @login_required
 def close_auction(request, listing_id):
-    ...
+    listing = Auction.objects.get(pk=listing_id)
+    higher_bid = Bid.objects.filter(auction_id=listing_id).order_by("-amount")[0]
+    
+    listing.status = 1
+    listing.winner = higher_bid.author
+    listing.save()
+
+    return HttpResponseRedirect(reverse("see listing", args=[listing_id]))
+
