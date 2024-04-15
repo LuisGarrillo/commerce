@@ -2,6 +2,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from .utils import options, valid_image_extensions
+from .models import Auction, Bid, User
 
 def check_title(title):
     return len(title) < 10 or len(title) > 64
@@ -24,6 +25,14 @@ def check_cover(cover):
             return False
     
     return True
+
+
+def check_amount(amount, higher_amount):
+    return amount < higher_amount
+
+
+def check_author(listing, bid_author):
+    return listing.author.id == bid_author.id
 
 
 def verify_listing(title, description, initial_bid, category, cover):
@@ -62,4 +71,21 @@ def verify_listing(title, description, initial_bid, category, cover):
         "message": "The listing has been succesfully created."
     }
     
+
+def verify_bid(amount, higher_amount, listing, author):
+    if check_amount(amount, higher_amount):
+        return {
+            "success": False, 
+            "message": "The bid amount must be higher than the current highest bid."
+        }
+
+    if check_author:
+        return {
+            "success": False, 
+            "message": "The author of the listing cannot bid."
+        }
     
+    return {
+        "success": True, 
+        "message": "The bid has been succesfully placed."
+    }

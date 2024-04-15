@@ -29,7 +29,11 @@
             {% if user.is_authenticated %}
                 {% if not listing.winner %}
                     {% if not is_author %}
-                        <form action="{% url 'bid listing' listing.id %}">
+                    {% if message %}
+                        <p>{{ message }}</p>
+                    {% endif %}
+                        <form action="{% url 'bid listing' listing.id %}" method="post">
+                            {% csrf_token %}
                             <input name="bid-amount" type="number">
                             <button name="bid-button" type="submit">Bid</button>
                         </form>
@@ -40,6 +44,9 @@
                     {% endif %}
                 {% else %}
                     <h3>This Auction is closed.</h3>
+                    {% if listing.winner.id == request.user.id %}
+                        <h2>You won this auction!</h2>
+                    {% endif %}
                 {% endif %}   
             {% endif %}
         </div>
