@@ -75,6 +75,7 @@ def detailed_listing(request, listing_id):
     return render(request, "auctions/detailed-listing.html", {
         "listing": listing,
         "is_author": listing.author.id == request.user.id,
+        "on_watchlist": len(listing.watchlist.filter(id=request.user.id)) == 1,
         "higher_bid": higher_bid,
     })
 
@@ -109,11 +110,17 @@ def bid(request, listing_id):
 
 @login_required
 def add_watchlist(request, listing_id):
-    ...
+    listing = Auction.objects.get(pk=listing_id)
+    listing.watchlist.add(User.objects.get(pk= request.user.id))
+
+    return HttpResponseRedirect(reverse("see listing", args=[listing_id]))
 
 @login_required
 def remove_watchlist(request, listing_id):
-    ...
+    listing = Auction.objects.get(pk=listing_id)
+    listing.watchlist.remove(User.objects.get(pk= request.user.id))
+
+    return HttpResponseRedirect(reverse("see listing", args=[listing_id]))
 
 @login_required
 def close_auction(request, listing_id):
