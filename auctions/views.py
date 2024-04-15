@@ -7,7 +7,7 @@ from django.urls import reverse
 
 from .models import User, Auction, Bid
 from .utils import options
-from .verifications import verify_listing
+from .verifications import verify_listing, verify_bid
 from .models_handler import save_auction, create_bid
 
 def index(request):
@@ -69,7 +69,7 @@ def register(request):
     else:
         return render(request, "auctions/register.html")
 
-def detailed_listing(request, listing_id):
+def detailed_listing(request, listing_id, message=None):
     listing = Auction.objects.get(pk=listing_id)
     higher_bid = Bid.objects.filter(auction_id=listing_id).order_by("-amount")[0]
     return render(request, "auctions/detailed-listing.html", {
@@ -77,6 +77,7 @@ def detailed_listing(request, listing_id):
         "is_author": listing.author.id == request.user.id,
         "on_watchlist": len(listing.watchlist.filter(id=request.user.id)) == 1,
         "higher_bid": higher_bid,
+        "message": message
     })
 
 @login_required
@@ -110,9 +111,14 @@ def bid(request, listing_id):
         bid_amount = float(request.POST["bid-amount"])
         higher_bid = Bid.objects.filter(auction_id=listing_id).order_by("-amount")[0]
 
-        #verification
+        listing = Auction.objects.get(pk=listing_id)
+        bid_author = User.objects.get(pk=request.user.id)
 
-        create_bid(Auction.objects.get(pk=listing_id), User.objects.get(pk=request.user.id), bid_amount)
+        response = verify_bid(bid_amount, higher_bid.amount, listing, bid_author)
+        if not response["success"]:
+            return HttpResponseRedirect(reverse("see listing", args=[listing_id, response["message"]]))
+
+        create_bid(listing, bid_author, bid_amount)
         return HttpResponseRedirect(reverse("see listing", args=[listing_id]))
 
 

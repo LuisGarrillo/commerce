@@ -29,6 +29,9 @@
             {% if user.is_authenticated %}
                 {% if not listing.winner %}
                     {% if not is_author %}
+                    {% if message %}
+                        <p>{{ message }}</p>
+                    {% endif %}
                         <form action="{% url 'bid listing' listing.id %}" method="post">
                             {% csrf_token %}
                             <input name="bid-amount" type="number">
