@@ -5,7 +5,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
-from .models import User, Auction, Bid
+from .models import User, Auction, Bid, Comment
 from .utils import options
 from .verifications import verify_listing, verify_bid
 from .models_handler import save_auction, create_bid
@@ -69,16 +69,21 @@ def register(request):
     else:
         return render(request, "auctions/register.html")
 
+
 def detailed_listing(request, listing_id, message=None):
     listing = Auction.objects.get(pk=listing_id)
     higher_bid = Bid.objects.filter(auction_id=listing_id).order_by("-amount")[0]
+    comments = Comment.objects.filter(auction_id=listing_id).order_by("timestamp")
+
     return render(request, "auctions/detailed-listing.html", {
         "listing": listing,
         "is_author": listing.author.id == request.user.id,
         "on_watchlist": len(listing.watchlist.filter(id=request.user.id)) == 1,
         "higher_bid": higher_bid,
-        "message": message
+        "message": message,
+        "comments": comments
     })
+
 
 @login_required
 def create_listing(request):
@@ -122,7 +127,6 @@ def bid(request, listing_id):
         return HttpResponseRedirect(reverse("see listing", args=[listing_id]))
 
 
-
 @login_required
 def add_watchlist(request, listing_id):
     listing = Auction.objects.get(pk=listing_id)
@@ -130,12 +134,14 @@ def add_watchlist(request, listing_id):
 
     return HttpResponseRedirect(reverse("see listing", args=[listing_id]))
 
+
 @login_required
 def remove_watchlist(request, listing_id):
     listing = Auction.objects.get(pk=listing_id)
     listing.watchlist.remove(User.objects.get(pk= request.user.id))
 
     return HttpResponseRedirect(reverse("see listing", args=[listing_id]))
+
 
 @login_required
 def close_auction(request, listing_id):
@@ -147,4 +153,13 @@ def close_auction(request, listing_id):
     listing.save()
 
     return HttpResponseRedirect(reverse("see listing", args=[listing_id]))
+
+@login_required
+def comment(request, listing_id):
+    ...
+
+@login_required
+def like(request, listing_id):
+    ...
+
 

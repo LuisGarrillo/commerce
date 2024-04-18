@@ -1,6 +1,7 @@
 {% extends "auctions/layout.html" %}
 
 {% block body %}
+<div>
     <div>
         <img src="{{ listing.cover.url }}">
     </div>
@@ -51,4 +52,49 @@
             {% endif %}
         </div>
     </div>
+</div>
+<hr>
+{% if user.is_authenticated %}
+    <div>
+        <div>
+            <form action="{% url 'post comment' listing.id %}" method="post" enctype="multipart/form-data">
+                <div>
+                    <div>
+                        <textarea placeholder="Your comment" required></textarea>
+                    </div>
+                    <div>
+                        <input type="file" accept="image/*" value="Add an image">
+                    </div>
+                    <div>
+                        <button name="comment-btn">Comment</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div>
+            {% for comment in comments %}
+                <div>
+                    <div>
+                        <h4>comment.author.username</h4>
+                    </div>
+                    <div>
+                        <p>comment.body</p>
+                    </div>
+                    <div>
+                        <img src="{{ comment.image.url }}">
+                    </div>
+                    <form action="{% url 'like comment' listing.id %}" method="post">
+                        <div>
+                            <input name="comment_id" type="hidden">
+                            <button name="like-btn">Like</button>
+                        </div>
+                    </form>
+                </div>
+            {% empty %}
+                <h2>Nobody has posted anything yet...</h2>
+            {% endfor %}
+        </div>
+    </div>
+{% endif %}
+   
 {% endblock %}
