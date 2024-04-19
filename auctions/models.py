@@ -5,7 +5,6 @@ from django.utils import timezone
 import os
 
 class User(AbstractUser):
-    email_address = models.CharField(max_length=500)
     cellphone_number = models.CharField(max_length=20)
     gender = models.CharField(max_length=20)
     birthday = models.DateField(default=timezone.now)

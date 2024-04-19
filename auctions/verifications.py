@@ -3,6 +3,7 @@ from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from .utils import options, valid_image_extensions
 from .models import Auction, Bid, User
+from validator_collection import checkers
 
 def check_title(title):
     return len(title) < 10 or len(title) > 64 or title.isspace()
@@ -113,3 +114,6 @@ def verify_comment(body, image):
         "success": True, 
         "message": "The comment has been succesfully posted."
     }
+
+def verify_user(first_name, last_name, birthday, gender, cellphone_number, email, username, password, confirmation):
+    ...

@@ -6,7 +6,7 @@ from django.shortcuts import render
 from django.urls import reverse
 
 from .models import User, Auction, Bid, Comment
-from .utils import options
+from .utils import options, genders
 from .verifications import verify_listing, verify_bid, verify_comment
 from .models_handler import save_auction, create_bid, create_comment
 
@@ -50,6 +50,12 @@ def logout_view(request):
 
 def register(request):
     if request.method == "POST":
+        first_name = request.POST["first_name"]
+        last_name = request.POST["last_name"]
+        birthday = request.POST["birthday"]
+        gender = request.POST["gender"]
+        cellphone_number = request.POST["cellphone"]
+
         username = request.POST["username"]
         email = request.POST["email"]
 
@@ -72,7 +78,9 @@ def register(request):
         login(request, user)
         return HttpResponseRedirect(reverse("index"))
     else:
-        return render(request, "auctions/register.html")
+        return render(request, "auctions/register.html", {
+            "genders": genders
+        })
 
 
 def detailed_listing(request, listing_id, message=None, comment_error=None):
