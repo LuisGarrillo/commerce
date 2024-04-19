@@ -2,6 +2,25 @@
 
 {% block body %}
     <h2>Active Listings</h2>
+    <div>
+        <div>
+            <a>Show Watchlist</a>
+        </div>
+        <div>
+            <div>
+                <div class="dropdown">
+                    <button class="dropbtn">Dropdown</button>
+                    <div class="dropdown-content">
+                        {% for option in options %}
+                            <a href="{% url 'category index' option %}">
+                                {{option}}
+                            </a>
+                        {% endfor %}
+                    </div>
+                </div> 
+            </div>
+        </div>
+    </div>
     <div class="listing-list">
         {% for listing in listings %}
             <a href="{% url 'see listing' listing.id %}" class="listing-container">

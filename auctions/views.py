@@ -10,11 +10,16 @@ from .utils import options
 from .verifications import verify_listing, verify_bid, verify_comment
 from .models_handler import save_auction, create_bid, create_comment
 
-def index(request):
-    listings = Auction.objects.exclude(author=request.user.id).filter(status=0)
-
+def index(request, category = None):
+    listings = Auction.objects.exclude(author=request.user.id)
+    if category:
+        listings = listings.filter(category=category)
+    
+    listings = listings.filter(status=0)
+    
     return render(request, "auctions/index.html", {
-        "listings": listings
+        "listings": listings,
+        "options": options
     })
 
 
