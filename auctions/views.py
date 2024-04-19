@@ -7,8 +7,8 @@ from django.urls import reverse
 
 from .models import User, Auction, Bid, Comment
 from .utils import options
-from .verifications import verify_listing, verify_bid
-from .models_handler import save_auction, create_bid
+from .verifications import verify_listing, verify_bid, verify_comment
+from .models_handler import save_auction, create_bid, create_comment
 
 def index(request):
     listings = Auction.objects.exclude(author=request.user.id).filter(status=0)
@@ -70,7 +70,7 @@ def register(request):
         return render(request, "auctions/register.html")
 
 
-def detailed_listing(request, listing_id, message=None):
+def detailed_listing(request, listing_id, message=None, comment_error=None):
     listing = Auction.objects.get(pk=listing_id)
     higher_bid = Bid.objects.filter(auction_id=listing_id).order_by("-amount")[0]
     comments = Comment.objects.filter(auction_id=listing_id).order_by("timestamp")
@@ -81,7 +81,8 @@ def detailed_listing(request, listing_id, message=None):
         "on_watchlist": len(listing.watchlist.filter(id=request.user.id)) == 1,
         "higher_bid": higher_bid,
         "message": message,
-        "comments": comments
+        "comments": comments,
+        "comment_error": comment_error
     })
 
 
@@ -138,7 +139,7 @@ def add_watchlist(request, listing_id):
 @login_required
 def remove_watchlist(request, listing_id):
     listing = Auction.objects.get(pk=listing_id)
-    listing.watchlist.remove(User.objects.get(pk= request.user.id))
+    listing.watchlist.remove(User.objects.get(pk=request.user.id))
 
     return HttpResponseRedirect(reverse("see listing", args=[listing_id]))
 
@@ -156,7 +157,20 @@ def close_auction(request, listing_id):
 
 @login_required
 def comment(request, listing_id):
-    ...
+    body = request.POST["body"]
+    image = request.FILES["image"] if "image" in request.FILES else None
+    
+    response = verify_comment(body, image)
+
+    if not response["success"]:
+        return HttpResponseRedirect(reverse("see listing", args=[listing_id, response["message"], 1]))
+    
+    auction = Auction.objects.get(pk=listing_id)
+    author = User.objects.get(pk=request.user.id)
+
+    create_comment(body, image, auction, author)
+    return HttpResponseRedirect(reverse("see listing", args=[listing_id]))
+    
 
 @login_required
 def like(request, listing_id):

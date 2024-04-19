@@ -30,9 +30,9 @@
             {% if user.is_authenticated %}
                 {% if not listing.winner %}
                     {% if not is_author %}
-                    {% if message %}
-                        <p>{{ message }}</p>
-                    {% endif %}
+                        {% if message and not comment_error %}
+                            <p>{{ message }}</p>
+                        {% endif %}
                         <form action="{% url 'bid listing' listing.id %}" method="post">
                             {% csrf_token %}
                             <input name="bid-amount" type="number">
@@ -59,11 +59,15 @@
         <div>
             <form action="{% url 'post comment' listing.id %}" method="post" enctype="multipart/form-data">
                 <div>
+                    {% if message and comment_error %}
+                        <p>{{message}}</p>
+                    {% endif %}
+                    {% csrf_token %}
                     <div>
-                        <textarea placeholder="Your comment" required></textarea>
+                        <textarea name="body" placeholder="Your comment" required></textarea>
                     </div>
                     <div>
-                        <input type="file" accept="image/*" value="Add an image">
+                        <input name="image" type="file" accept="image/*" value="Add an image">
                     </div>
                     <div>
                         <button name="comment-btn">Comment</button>
@@ -75,15 +79,18 @@
             {% for comment in comments %}
                 <div>
                     <div>
-                        <h4>comment.author.username</h4>
+                        <h4>{{comment.author.username}}</h4>
                     </div>
                     <div>
-                        <p>comment.body</p>
+                        <p>{{comment.body}}</p>
                     </div>
-                    <div>
-                        <img src="{{ comment.image.url }}">
-                    </div>
+                    {% if comment.image %}
+                        <div>
+                            <img src="{{ comment.image.url }}">
+                        </div>
+                    {% endif %}
                     <form action="{% url 'like comment' listing.id %}" method="post">
+                        {% csrf_token %}
                         <div>
                             <input name="comment_id" type="hidden">
                             <button name="like-btn">Like</button>
