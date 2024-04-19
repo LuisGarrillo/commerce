@@ -35,8 +35,9 @@ class Bid(models.Model):
 
 class Comment(models.Model):
     body = models.CharField(max_length=500)
-    image = models.ImageField(upload_to="comments/")
+    image = models.ImageField(upload_to="comments/", null=True, blank=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="comments")
+    timestamp = models.DateTimeField(default=timezone.now)
     auction = models.ForeignKey(Auction, on_delete=models.CASCADE, related_name="comment_list")
     likes = models.ManyToManyField(User, related_name="liked_posts", null=True, blank=True)
 

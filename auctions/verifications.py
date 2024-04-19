@@ -5,10 +5,11 @@ from .utils import options, valid_image_extensions
 from .models import Auction, Bid, User
 
 def check_title(title):
-    return len(title) < 10 or len(title) > 64
+    return len(title) < 10 or len(title) > 64 or title.isspace()
+
 
 def check_description(description):
-    return len(description) < 30 or len(description) > 500
+    return len(description) < 30 or len(description) > 500 or description.isspace()
 
 
 def check_initial_bid(initial_bid):
@@ -19,7 +20,7 @@ def check_category(category):
     return not category in options
 
 
-def check_cover(cover):
+def check_image(cover):
     for extension in valid_image_extensions:
         if cover.name.endswith(extension):
             return False
@@ -35,6 +36,10 @@ def check_author(listing, bid_author):
     return listing.author.id == bid_author.id
 
 
+def check_body(body):
+    return len(body) < 1 or len(body) > 500 or body.isspace()
+
+
 def verify_listing(title, description, initial_bid, category, cover):
     if check_title(title):
         return {
@@ -45,7 +50,7 @@ def verify_listing(title, description, initial_bid, category, cover):
     if check_initial_bid(initial_bid):
         return {
             "success": False, 
-            "message": "The title field must be greater than $0 and less than $99999999999.99"
+            "message": "The initial bid must be greater than $0 and less than $99999999999.99"
             }
     
     if check_category(category):
@@ -54,7 +59,7 @@ def verify_listing(title, description, initial_bid, category, cover):
             "message": "Invalid category"
             }
     
-    if check_cover(cover):
+    if check_image(cover):
         return {
             "success": False, 
             "message": "Invalid image file. It must end with either '.png', '.jpg' or '.jpeg'."
@@ -88,4 +93,23 @@ def verify_bid(amount, higher_amount, listing, author):
     return {
         "success": True, 
         "message": "The bid has been succesfully placed."
+    }
+
+def verify_comment(body, image):
+    if check_body(body):
+        return {
+            "success": False,
+            "message": "The comment body must have a between 1 and 500 characters."
+        }
+    
+    if image:
+        if check_image(image):
+            return {
+                "success": False,
+                "message": "Invalid image file. It must end with either '.png', '.jpg' or '.jpeg'."
+            }
+    
+    return {
+        "success": True, 
+        "message": "The comment has been succesfully posted."
     }
