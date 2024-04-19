@@ -181,4 +181,12 @@ def comment(request, listing_id):
 def like(request, listing_id):
     ...
 
+@login_required
+def watchlist(request):
+    user = User.objects.get(pk=request.user.id)
+    watched_listings = user.watched_listings.all()
 
+    return render(request, "auctions/watchlist.html", {
+        "listings": watched_listings,
+        "options": options
+    })
