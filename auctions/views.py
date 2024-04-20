@@ -7,7 +7,7 @@ from django.urls import reverse
 
 from .models import User, Auction, Bid, Comment
 from .utils import options, genders
-from .verifications import verify_listing, verify_bid, verify_comment
+from .verifications import verify_listing, verify_bid, verify_comment, verify_user
 from .models_handler import save_auction, create_bid, create_comment
 
 def index(request, category = None):
@@ -62,9 +62,13 @@ def register(request):
         # Ensure password matches confirmation
         password = request.POST["password"]
         confirmation = request.POST["confirmation"]
-        if password != confirmation:
+        
+        response = verify_user(
+            first_name, last_name, birthday, gender, cellphone_number, email, username, password, confirmation
+        )
+        if not response["success"]:
             return render(request, "auctions/register.html", {
-                "message": "Passwords must match."
+                "message": response["message"]
             })
 
         # Attempt to create new user
