@@ -9,6 +9,14 @@ options = (
     "Literature",
     "Antiquities"
 )
+
+genders = (
+    "Male",
+    "Female",
+    "Non-Binary",
+    "Other"
+)
+
 valid_image_extensions = (
     "png",
     "jpg",

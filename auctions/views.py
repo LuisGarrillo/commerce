@@ -6,15 +6,20 @@ from django.shortcuts import render
 from django.urls import reverse
 
 from .models import User, Auction, Bid, Comment
-from .utils import options
-from .verifications import verify_listing, verify_bid, verify_comment
+from .utils import options, genders
+from .verifications import verify_listing, verify_bid, verify_comment, verify_user
 from .models_handler import save_auction, create_bid, create_comment
 
-def index(request):
-    listings = Auction.objects.exclude(author=request.user.id).filter(status=0)
-
+def index(request, category = None):
+    listings = Auction.objects.exclude(author=request.user.id)
+    if category:
+        listings = listings.filter(category=category)
+    
+    listings = listings.filter(status=0)
+    
     return render(request, "auctions/index.html", {
-        "listings": listings
+        "listings": listings,
+        "options": options
     })
 
 
@@ -45,15 +50,25 @@ def logout_view(request):
 
 def register(request):
     if request.method == "POST":
+        first_name = request.POST["first_name"]
+        last_name = request.POST["last_name"]
+        birthday = request.POST["birthday"]
+        gender = request.POST["gender"]
+        cellphone_number = request.POST["cellphone"]
+
         username = request.POST["username"]
         email = request.POST["email"]
 
         # Ensure password matches confirmation
         password = request.POST["password"]
         confirmation = request.POST["confirmation"]
-        if password != confirmation:
+        
+        response = verify_user(
+            first_name, last_name, birthday, gender, cellphone_number, email, username, password, confirmation
+        )
+        if not response["success"]:
             return render(request, "auctions/register.html", {
-                "message": "Passwords must match."
+                "message": response["message"]
             })
 
         # Attempt to create new user
@@ -67,7 +82,9 @@ def register(request):
         login(request, user)
         return HttpResponseRedirect(reverse("index"))
     else:
-        return render(request, "auctions/register.html")
+        return render(request, "auctions/register.html", {
+            "genders": genders
+        })
 
 
 def detailed_listing(request, listing_id, message=None, comment_error=None):
@@ -176,4 +193,12 @@ def comment(request, listing_id):
 def like(request, listing_id):
     ...
 
+@login_required
+def watchlist(request):
+    user = User.objects.get(pk=request.user.id)
+    watched_listings = user.watched_listings.all()
 
+    return render(request, "auctions/watchlist.html", {
+        "listings": watched_listings,
+        "options": options
+    })
